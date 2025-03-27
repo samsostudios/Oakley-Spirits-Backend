@@ -2,10 +2,18 @@ import fetch from "node-fetch";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://oakleyspirits.webflow.io"
-  );
+  const allowedOrigins = [
+    "https://oakleyspirits.webflow.io",
+    "https://www.oakleyspirits.com",
+    "http://localhost:3000",
+  ];
+
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
