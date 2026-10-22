@@ -25,7 +25,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { email, collector } = req.body;
+  const { email, collector, turnstileToken } = req.body;
+
+  // Turnstile verification
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!turnstileSecret) {
+    return res.status(400).json({ message: "Missing security token" });
+  }
+
+  const verifyRes = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        secret: turnstileSecret,
+        response: turnstileToken,
+      }),
+    },
+  );
+
+  const verifyData = (await verifyRes.json()) as { success: boolean };
+
+  if (!verifyData.success) {
+    return res.status(403).json({ message: "Bot check failed" });
+  }
 
   if (!email || typeof email !== "string") {
     return res.status(400).json({ message: "Invalid Email" });
