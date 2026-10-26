@@ -1,5 +1,4 @@
-import fetch from "node-fetch";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "./verceltypes.js";
 
 const allowedOrigins = new Set([
   "https://oakleyspirits.webflow.io",
