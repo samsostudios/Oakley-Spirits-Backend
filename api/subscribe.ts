@@ -45,7 +45,11 @@ export async function handleSubscribe(
   }
 
   const email = typeof body.email === "string" ? body.email.trim() : "";
-  if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (
+    !email ||
+    email.length > 254 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) {
     return res.status(400).json({ message: "Invalid email" });
   }
 
@@ -55,7 +59,9 @@ export async function handleSubscribe(
     !turnstileToken ||
     turnstileToken.length > 2048
   ) {
-    return res.status(400).json({ message: "Missing or invalid security token" });
+    return res
+      .status(400)
+      .json({ message: "Missing or invalid security token" });
   }
 
   const turnstileSecret = env.TURNSTILE_SECRET_KEY;
@@ -79,7 +85,10 @@ export async function handleSubscribe(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ secret: turnstileSecret, response: turnstileToken }),
+        body: JSON.stringify({
+          secret: turnstileSecret,
+          response: turnstileToken,
+        }),
       },
     );
 
@@ -122,7 +131,7 @@ export async function handleSubscribe(
     const response = await fetcher(url, {
       method: "POST",
       headers: {
-        Authorization: `apikey ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       signal: mailchimpController.signal,
@@ -135,7 +144,8 @@ export async function handleSubscribe(
       return res.status(response.status >= 400 ? response.status : 502).json({
         message: "Mailchimp error",
         error: {
-          title: typeof error.title === "string" ? error.title : "Mailchimp error",
+          title:
+            typeof error.title === "string" ? error.title : "Mailchimp error",
           detail:
             typeof error.detail === "string"
               ? error.detail
